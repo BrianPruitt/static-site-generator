@@ -3,7 +3,7 @@ from enum import Enum
 class TextType(Enum):
     TEXT = "text"
     BOLD = "bold"
-    ITALIC_ = "italic"
+    ITALIC = "italic"
     CODE = "code"
     LINK = "link"
     IMAGE = "image"

@@ -1,56 +1,35 @@
 import os
 import shutil
-import re
 
-from generate_page import generate_page
+from copystatic import copy_files_recursive
+from gencontent import generate_page
+
+dir_path_static = "./static"
+dir_path_public = "./public"
+dir_path_content = "./content"
+template_path = "./template.html"
 
 
-def copy_directory(src, dest):
-    """
-    Recursively copies all contents from src directory to dest directory.
-    First, it deletes all contents of dest to ensure a clean copy.
-    """
-    # Ensure the source directory exists
-    if not os.path.exists(src):
-        print(f"Source directory '{src}' does not exist.")
-        return
-    
-    # Remove destination directory if it exists
-    if os.path.exists(dest):
-        print(f"Removing existing directory: {dest}")
-        shutil.rmtree(dest)
-    
-    # Create the destination directory
-    os.makedirs(dest, exist_ok=True)
-    print(f"Created directory: {dest}")
-    
-    # Recursively copy contents
-    for item in os.listdir(src):
-        src_path = os.path.join(src, item)
-        dest_path = os.path.join(dest, item)
-        
-        if os.path.isdir(src_path):
-            print(f"Creating directory: {dest_path}")
-            os.makedirs(dest_path, exist_ok=True)
-            copy_directory(src_path, dest_path)
-        else:
-            print(f"Copying file: {src_path} -> {dest_path}")
-            shutil.copy(src_path, dest_path)
+def generate_pages_recursive(content_dir, template_path, public_dir):
+    for root, _, files in os.walk(content_dir):
+        for file in files:
+            if file.endswith(".md"):
+                from_path = os.path.join(root, file)
+                relative_path = os.path.relpath(from_path, content_dir)
+                dest_path = os.path.join(public_dir, relative_path).replace(".md", ".html")
+                generate_page(from_path, template_path, dest_path)
+
 
 def main():
-    src_dir = "static"
-    dest_dir = "public"
-    content_file = "content/index.md"
-    template_file = "template.html"
-    output_file = "public/index.html"
-    
-    # Clean public directory and copy static files
-    copy_directory(src_dir, dest_dir)
-    
-    # Generate main page
-    generate_page(content_file, template_file, output_file)
-    
-    print("Site generation complete.")
+    print("Deleting public directory...")
+    if os.path.exists(dir_path_public):
+        shutil.rmtree(dir_path_public)
 
-if __name__ == "__main__":
-    main()
+    print("Copying static files to public directory...")
+    copy_files_recursive(dir_path_static, dir_path_public)
+
+    print("Generating pages...")
+    generate_pages_recursive(dir_path_content, template_path, dir_path_public)
+
+
+main()

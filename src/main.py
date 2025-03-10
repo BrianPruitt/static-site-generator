@@ -1,10 +1,15 @@
-from htmlnode import HTMLNode
-from textnode import TextNode, TextType
 import os
 import shutil
+import re
+
+from generate_page import generate_page
 
 
 def copy_directory(src, dest):
+    """
+    Recursively copies all contents from src directory to dest directory.
+    First, it deletes all contents of dest to ensure a clean copy.
+    """
     # Ensure the source directory exists
     if not os.path.exists(src):
         print(f"Source directory '{src}' does not exist.")
@@ -32,11 +37,20 @@ def copy_directory(src, dest):
             print(f"Copying file: {src_path} -> {dest_path}")
             shutil.copy(src_path, dest_path)
 
-
 def main():
     src_dir = "static"
     dest_dir = "public"
+    content_file = "content/index.md"
+    template_file = "template.html"
+    output_file = "public/index.html"
+    
+    # Clean public directory and copy static files
     copy_directory(src_dir, dest_dir)
-    print("Copy process completed.")
+    
+    # Generate main page
+    generate_page(content_file, template_file, output_file)
+    
+    print("Site generation complete.")
 
-main()
+if __name__ == "__main__":
+    main()
